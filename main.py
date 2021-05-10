@@ -24,18 +24,18 @@ ax^n: a 곱하기 x의 n승
 
 '''
 
-def main():
-    expr = Limit(
-        symbol='x',
-        approachTo=0,
-        value=Fraction(
-            numerator=Polynomial(terms=[Term(5, 'x', 2), Term(3, 'x', 1)]),
-            denominator=Polynomial(terms=[Term(2, 'x', 1)])
-        )
-    )
-    print(expr)
-    print(expr.evaluate())
-
+# def main():
+#     expr = Limit(
+#         symbol='x',
+#         approachTo=0,
+#         value=Fraction(
+#             numerator=Polynomial(terms=[Term(5, 'x', 2), Term(3, 'x', 1)]),
+#             denominator=Polynomial(terms=[Term(2, 'x', 1)])
+#         )
+#     )
+#     print(expr.latex())
+#     print(expr)
+#     print(expr.evaluate())
 
 
 
@@ -55,7 +55,6 @@ class Limit: # 극한
         # value가 분수라고 가정
         numValue = self.value.numerator.evaluate({ self.symbol: self.approachTo })
         denomValue = self.value.denominator.evaluate({ self.symbol: self.approachTo })
-        print(f'{numValue} / {denomValue}')
 
         if numValue == 0 and denomValue == 0:
             div = Polynomial([Term(1, self.symbol, 1), Term(-self.approachTo, self.symbol, 0)])
@@ -63,6 +62,9 @@ class Limit: # 극한
 
         else:
             return self.value.evaluate({ self.symbol: self.approachTo })
+
+    def latex(self):
+        return f'\\lim_{{{self.symbol} \\to {self.approachTo}}} {self.value.latex()}'
 
 
 class Polynomial: # 다항식
@@ -113,7 +115,7 @@ class Polynomial: # 다항식
         quotient = [] # 몫
 
         while True:
-            if len(state.terms) == 0 or state.terms[0].exponent < other.terms[0].exponent:
+            if len(state.terms) == 0 or state.terms[0].exponent < other.terms[0].exponent: #
                 break
 
             mul = state.terms[0].divideTo(other.terms[0])
@@ -122,6 +124,9 @@ class Polynomial: # 다항식
             state = state.sub(numberToSub)
 
         return (Polynomial(quotient), state)
+
+    def latex(self):
+        return '+'.join([term.latex() for term in self.terms])
 
 
 
@@ -179,6 +184,14 @@ class Term: # 항
         if self.symbol != other.symbol: raise 'Error'
         return Term(self.coefficient / other.coefficient, self.symbol, self.exponent - other.exponent)
 
+    def latex(self):
+        if self.exponent == 0:
+            return f'{self.coefficient}'
+        if self.exponent == 1:
+            return f'{self.coefficient}{self.symbol}'
+
+        return f'{self.coefficient}{self.symbol}^{self.exponent}'
+
 
 class Fraction: # 분수
     def __init__(self, numerator, denominator):
@@ -191,6 +204,6 @@ class Fraction: # 분수
     def evaluate(self, symbols):
         return self.numerator.evaluate(symbols) / self.denominator.evaluate(symbols)
 
+    def latex(self):
+        return f'\\frac{{{self.numerator}}}{{{self.denominator}}}'
 
-
-main()
